@@ -4,7 +4,7 @@ use simple_logger::SimpleLogger;
 type MyResult<OkType> = Result<OkType, String>;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about="Downloading file from url", long_about = None)]
+#[command(author, version, about="Copying files from url", long_about = None)]
 struct Args {
     #[clap(short = 'u', long = "url", help = "public url pointing to file")]
     url: String,
