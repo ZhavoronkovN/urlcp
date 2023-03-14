@@ -5,7 +5,7 @@ package_name="urlcp"
 
 cargo build
 
-for arch in "x86_64-pc-windows-gnu" "x86_64-unknown-linux-gnu"
+for arch in "x86_64-pc-windows-gnu"
 do
     cargo build --release --target $arch
     mkdir -p ./releases/$version/$arch
