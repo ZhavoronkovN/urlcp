@@ -12,8 +12,3 @@ do
     cp ./target/$arch/release/$package_name* ./releases/$version/$arch
     rm ./releases/$version/$arch/$package_name.d
 done
-
-git add *
-git commit -m "Create release $version"
-git tag "$version"
-git push

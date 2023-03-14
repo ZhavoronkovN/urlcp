@@ -1,3 +1,4 @@
+use std::io::Cursor;
 use clap::*;
 use simple_logger::SimpleLogger;
 
@@ -38,26 +39,26 @@ async fn download_file(url: &String, output: &String, rewrite: bool) -> MyResult
             )
         })?;
     }
+
     let response = reqwest::get(url)
         .await
         .map_err(|e| format!("Failed to get {}, error : {}", url, e))?;
 
-    let mut output_file = std::fs::File::create(output)
+    let mut file = std::fs::File::create(output)
         .map_err(|e| format!("Failed to create output file {}, error : {}", output, e))?;
-    std::io::copy(
-        &mut response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to get content from {}, error {}", url, e))?
-            .as_bytes(),
-        &mut output_file,
-    )
-    .map_err(|e| {
-        format!(
-            "Failed to copy content from {} to {}, error : {}",
-            url, output, e
-        )
-    })?;
+
+    let mut content = Cursor::new(response.bytes()
+        .await
+        .map_err(|e| format!("Failed to create cursor, error {}", e))?);
+
+    std::io::copy(&mut content, &mut file)
+        .map_err(|e| {
+            format!(
+                "Failed to copy content from {} to {}, error : {}",
+                url, output, e
+            )
+        })?;
+
     log::info!("Downloaded {} to {}", url, output);
     Ok(())
 }
@@ -65,10 +66,13 @@ async fn download_file(url: &String, output: &String, rewrite: bool) -> MyResult
 #[tokio::main]
 async fn main() -> MyResult<()> {
     SimpleLogger::new().with_level(log::LevelFilter::Info).init().unwrap();
+
     let args = Args::parse_from(std::env::args());
+
     match download_file(&args.url, &args.output, args.rewrite).await {
         Ok(()) => log::info!("Done"),
         Err(e) => log::error!("Not Done -- {}", e),
     };
+
     Ok(())
 }
